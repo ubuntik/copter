@@ -1,0 +1,27 @@
+#! /bin/sh
+cd ../obj
+rm -f *.o
+INCLUDES="-I ../src -I ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/ -I ../STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/ST/STM32F4xx/Include/ -I ../STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/Include/ -I ../STM32F4-Discovery_FW_V1.1.0/Utilities/STM32F4-Discovery/ "
+CFLAGS="-g -mthumb -mcpu=cortex-m4 -nostartfiles -nostdlib -ffunction-sections -DUSE_STDPERIPH_DRIVER $INCLUDES"
+## SOURCES="../src/main.c ../src/stm32f4xx_it.c ../src/system_stm32f4xx.c ../src/startup_stm32f4xx.s ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_syscfg.c   ../STM32F4-Discovery_FW_V1.1.0/Utilities/STM32F4-Discovery/stm32f4_discovery.c ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c"
+SOURCES="../src/main.c ../src/stm32f4xx_it.c ../src/system_stm32f4xx.c ../src/startup_stm32f4xx.s ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_syscfg.c ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c"
+arm-none-eabi-gcc $SOURCES -o main  $CFLAGS -T ../src/stm32_flash.ld -lm -lgcc -lc -lnosys -mthumb -mcpu=cortex-m4
+
+
+exit 0
+
+arm-none-eabi-gcc ../src/main.c -c $CFLAGS
+arm-none-eabi-gcc ../src/stm32f4xx_it.c -c $CFLAGS
+arm-none-eabi-gcc ../src/system_stm32f4xx.c -c $CFLAGS 
+arm-none-eabi-gcc ../src/startup_stm32f4xx.s -c $CFLAGS 
+#arm-none-eabi-gcc ../src/startup_ARMCM4.S -c $CFLAGS 
+for i in stm32f4xx_gpio.c stm32f4xx_rcc.c misc.c stm32f4xx_exti.c stm32f4xx_syscfg.c ; do
+	arm-none-eabi-gcc ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/$i -c $CFLAGS
+done
+arm-none-eabi-gcc  -c $CFLAGS ../STM32F4-Discovery_FW_V1.1.0/Utilities/STM32F4-Discovery/stm32f4_discovery.c
+
+#exit 0
+
+rm -f main.elf
+arm-none-eabi-ld -arch=armv7e-m -T ../src/stm32_flash.ld  -o main.elf *.o -L ~/gcc-arm-none-eabi-4_7-2012q4/lib/gcc/arm-none-eabi/4.7.3/armv7e-m/ -L ~/gcc-arm-none-eabi-4_7-2012q4/arm-none-eabi/lib/armv7e-m/ -lc -lm -lgcc -lnosys
+#arm-none-eabi-ld -arch=armv7e-m -T ../src/stm32_flash.ld  -o main.elf *.o -L ~/gcc-arm-none-eabi/arm-none-eabi/lib/armv7e-m/ -L ~/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/4.6.2/armv7e-m/ -lc -lm -lgcc -lnosys  

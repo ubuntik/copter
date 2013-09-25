@@ -1,0 +1,34 @@
+Content:
+README
+STM32F4-Discovery_FW_V1.1.0/
+src/
+
+# HOWTO
+
+# run interface for programmator
+# stlink was previously installed
+st-util -p 4242
+
+# stm32f4 discovery
+# download library "STM32F4DISCOVERY board firmware package"
+# library extracting to "STM32F4-Discovery_FW_V1.1.0"
+wget http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stsw-stm32068.zip
+
+# copy from STM32F4-Discovery_FW_V1.1.0/Project/Peripheral_Examples/SysTick/TrueSTUDIO/SysTick/stm32_flash.ld to src
+# copy from STM32F4-Discovery_FW_V1.1.0/Project/Peripheral_Examples/SysTick/stm32f4xx_conf.h to src
+# copy from STM32F4-Discovery_FW_V1.1.0//Libraries/CMSIS/ST/STM32F4xx/Source/Templates/TrueSTUDIO/startup_stm32f4xx.s to src
+# copy from STM32F4-Discovery_FW_V1.1.0//Project/Peripheral_Examples/SysTick/system_stm32f4xx.c to src
+
+# to compile use
+arm-none-eabi-gcc main.c -c -o ../obj/main.o -I ../STM32F4-Discovery_FW_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/ -I ../STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/ST/STM32F4xx/Include/ -I ../STM32F4-Discovery_FW_V1.1.0/Libraries/CMSIS/Include/
+
+# link
+#arm-none-eabi-ld -T stm32_flash.ld -nostartfiles -o ../main.elf ../obj/*.o  ~/arm-cs-tools/arm-none-eabi/lib/libc.a  -gc-sections
+arm-none-eabi-ld -T stm32_flash.ld -nostartfiles -o ../main.elf ../obj/*.o -gc-sections
+
+# start program
+cd obj
+arm-none-eabi-gdb main
+tar extended-remote :4242
+load
+run

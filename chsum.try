@@ -1,0 +1,119 @@
+diff --git a/main.c b/main.c
+index e120f07..59f86bc 100644
+--- a/main.c
++++ b/main.c
+@@ -44,15 +44,20 @@ void Delay(__IO uint32_t nTime);
+ * @param	None
+ * @retval	None
+ */
++uint8_t synctau = 24;
+ void emul_start_sig()
+ {
+ 	uint8_t i = 0;
+-	for (i = 0; i < 6; i++) {
+-		Delay(6);
+-		STM_EVAL_LEDToggle(LED4);
+-	}
++
++	STM_EVAL_LEDToggle(LED4);
++	Delay(30);
++//	for (i = 0; i < 6; i++) {
++//		Delay(6);
++//		STM_EVAL_LEDToggle(LED4);
++//	}
++
+ 	for (i = 0; i < 3; i++) {
+-		Delay(24);
++		Delay(synctau);
+ 		STM_EVAL_LEDToggle(LED4);
+ 	}
+ }
+@@ -64,8 +69,8 @@ void emul_start_sig()
+ */
+ void emul_finish_sig()
+ {
+-	Delay(150);
+-	STM_EVAL_LEDToggle(LED4);
++	Delay(60);
++//	STM_EVAL_LEDToggle(LED4);
+ }
+ 
+ /**
+@@ -76,10 +81,11 @@ void emul_finish_sig()
+ void emul_one()
+ {
+ 	uint8_t i = 0;
+-	for (i = 0; i < 6; i++) {
+-		Delay(6);
+-		STM_EVAL_LEDToggle(LED4);
+-	}
++	Delay(6);
++	STM_EVAL_LEDToggle(LED4);
++
++	Delay(6);
++	STM_EVAL_LEDToggle(LED4);
+ }
+ 
+ /**
+@@ -97,10 +103,14 @@ void emul_nill()
+ }
+ /* Private functions ---------------------------------------------------------*/
+ 
++//uint32_t signal = 0;
++uint32_t signal = 0x5088370f;
++uint32_t signalc = 0x5088370f;
++uint8_t csum = 0;
++uint32_t mask;
++__IO uint32_t ctime=0;
+ int main(void)
+ {
+-	uint32_t signal = input_sig;
+-	uint32_t mask;
+ 	/* Initialize Leds mounted on STM32F4-Discovery board */
+ 	STM_EVAL_LEDInit(LED4);
+ 	STM_EVAL_LEDInit(LED3);
+@@ -110,7 +120,7 @@ int main(void)
+ 	/* Turn on LED4 and LED5 */
+ 	STM_EVAL_LEDOn(LED4);
+ 	/* set in 0 on starting of signal */
+-	STM_EVAL_LEDToggle(LED4);
++//	STM_EVAL_LEDToggle(LED4);
+ 	STM_EVAL_LEDOn(LED5);
+ 
+ 	/* init button PIN */
+@@ -121,17 +131,23 @@ int main(void)
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+ 
+-	if (SysTick_Config(SystemCoreClock / 8000)) {
++//	if (SysTick_Config(SystemCoreClock / 8000)) {
++	if (SysTick_Config(SystemCoreClock / 7400)) {
+ 		/* Capture error */
+ 		while (1);
+ 	}
+ 
+ 	/* encode signal */
+ 	while(1) {
+-		if (!new_sig)
+-			continue;
+-		new_sig = 0;
++	//	if (!new_sig)
++	//		continue;
++	//	new_sig = 0;
++		while(ctime<121*6);
++		ctime = 0;
+ 		signal = input_sig;
++		//signal = 0x5088370f;
++		csum = (csum+1) % 16;
++		signalc = (signal&0xfffffff0) | csum;
+ 		emul_start_sig();
+ 		for (mask = 1<<31; mask>0; mask=mask>>1) {
+ 			(signal&mask) ? emul_one() : emul_nill();
+@@ -178,6 +194,7 @@ void TimingDelay_Decrement(void)
+ 	if (TimingDelay != 0x00) {
+ 		TimingDelay--;
+ 	}
++	ctime++;
+ 
+ 	current_bit = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_3);
+ //	GPIO_WriteBit(GPIOD, GPIO_Pin_12, (current_bit) ? (Bit_SET) : (Bit_RESET));
